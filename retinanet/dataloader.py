@@ -222,7 +222,7 @@ class CSVDataset(Dataset):
     def load_annotations(self, image_index):
         # get ground truth annotations
         annotation_list = self.image_data[self.image_names[image_index]]
-        annotations     = np.zeros((0, 5))
+        annotations = np.zeros((0, 5))
 
         # some images appear to miss annotations (like image with id 257034)
         if len(annotation_list) == 0:
@@ -239,7 +239,7 @@ class CSVDataset(Dataset):
             if (x2-x1) < 1 or (y2-y1) < 1:
                 continue
 
-            annotation        = np.zeros((1, 5))
+            annotation = np.zeros((1, 5))
             
             annotation[0, 0] = x1
             annotation[0, 1] = y1

@@ -160,7 +160,7 @@ class ClassificationModel(nn.Module):
 
 class ResNet(nn.Module):
 
-    def __init__(self, num_classes, block, layers):
+    def __init__(self, num_classes, block, layers, nms_th=0.25):
         self.inplanes = 64
         super(ResNet, self).__init__()
         self.conv1 = nn.Conv2d(3, 64, kernel_size=7, stride=2, padding=3, bias=False)
@@ -199,6 +199,7 @@ class ResNet(nn.Module):
                 m.bias.data.zero_()
 
         prior = 0.01
+        self.nms_th = nms_th
         
         self.classificationModel.output.weight.data.fill_(0)
         self.classificationModel.output.bias.data.fill_(-math.log((1.0-prior)/prior))
@@ -275,7 +276,7 @@ class ResNet(nn.Module):
             transformed_anchors = transformed_anchors[:, scores_over_thresh, :]
             scores = scores[:, scores_over_thresh, :]
 
-            anchors_nms_idx = nms(torch.cat([transformed_anchors, scores], dim=2)[0, :, :], 0.25)
+            anchors_nms_idx = nms(torch.cat([transformed_anchors, scores], dim=2)[0, :, :], self.nms_th)
 
             nms_scores, nms_class = classification[0, anchors_nms_idx, :].max(dim=1)
 
@@ -290,7 +291,7 @@ def resnet18(num_classes, pretrained=False, **kwargs):
     """
     model = ResNet(num_classes, BasicBlock, [2, 2, 2, 2], **kwargs)
     if pretrained:
-        model.load_state_dict(model_zoo.load_url(model_urls['resnet18'], model_dir='/home/user/.torch/models/'), strict=False)
+        model.load_state_dict(model_zoo.load_url(model_urls['resnet18'], model_dir='/home/vsun/.torch/models/'), strict=False)
     return model
 
 
@@ -301,7 +302,7 @@ def resnet34(num_classes, pretrained=False, **kwargs):
     """
     model = ResNet(num_classes, BasicBlock, [3, 4, 6, 3], **kwargs)
     if pretrained:
-        model.load_state_dict(model_zoo.load_url(model_urls['resnet34'], model_dir='/home/user/.torch/models/'), strict=False)
+        model.load_state_dict(model_zoo.load_url(model_urls['resnet34'], model_dir='/home/vsun/.torch/models/'), strict=False)
     return model
 
 
@@ -312,17 +313,17 @@ def resnet50(num_classes, pretrained=False, **kwargs):
     """
     model = ResNet(num_classes, Bottleneck, [3, 4, 6, 3], **kwargs)
     if pretrained:
-        model.load_state_dict(model_zoo.load_url(model_urls['resnet50'], model_dir='/home/user/.torch/models/'), strict=False)
+        model.load_state_dict(model_zoo.load_url(model_urls['resnet50'], model_dir='/home/vsun/.torch/models/'), strict=False)
     return model
 
-def resnet101(num_classes, pretrained=False, **kwargs):
+def resnet101(num_classes, pretrained=False, nms_th=0.25, **kwargs):
     """Constructs a ResNet-101 model.
     Args:
         pretrained (bool): If True, returns a model pre-trained on ImageNet
     """
-    model = ResNet(num_classes, Bottleneck, [3, 4, 23, 3], **kwargs)
+    model = ResNet(num_classes, Bottleneck, [3, 4, 23, 3], nms_th=nms_th, **kwargs)
     if pretrained:
-        model.load_state_dict(model_zoo.load_url(model_urls['resnet101'], model_dir='/home/user/.torch/models/'), strict=False)
+        model.load_state_dict(model_zoo.load_url(model_urls['resnet101'], model_dir='/home/vsun/.torch/models/'), strict=False)
     return model
 
 
@@ -333,5 +334,5 @@ def resnet152(num_classes, pretrained=False, **kwargs):
     """
     model = ResNet(num_classes, Bottleneck, [3, 8, 36, 3], **kwargs)
     if pretrained:
-        model.load_state_dict(model_zoo.load_url(model_urls['resnet152'], model_dir='/home/user/.torch/models/'), strict=False)
+        model.load_state_dict(model_zoo.load_url(model_urls['resnet152'], model_dir='/home/vsun/.torch/models/'), strict=False)
     return model
